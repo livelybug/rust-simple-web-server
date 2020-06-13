@@ -4,15 +4,21 @@ use std::net::TcpListener;
 use std::net::TcpStream;
 use std::thread;
 use std::time::Duration;
+use simple_web_server::ThreadPool;
 // --snip--
 
 fn main() {
     let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
+    let pool = ThreadPool::new(4);
+
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        handle_connection(stream);
+        // send closure to thread pool for worker to pool
+        pool.execute(|| {
+            handle_connection(stream);
+        });
     }
 }
 
